@@ -165,8 +165,8 @@ class TicketTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Agent/Tickets/Index')
-            ->has('tickets', 1)
-            ->where('tickets.0.id', $ticket1->id)
+            ->has('tickets.data', 1)
+            ->where('tickets.data.0.id', $ticket1->id)
         );
     }
 
@@ -203,8 +203,151 @@ class TicketTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Agent/Tickets/Index')
-            ->has('tickets', 1)
-            ->where('tickets.0.id', $ticket1->id)
+            ->has('tickets.data', 1)
+            ->where('tickets.data.0.id', $ticket1->id)
         );
+    }
+    /**
+     * Test: Normal priority ticket has a 24-hour SLA.
+     */
+    public function test_normal_priority_ticket_has_24h_sla(): void
+    {
+        $org    = Organization::factory()->create();
+        $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+
+        $this->actingAs($client)->post(route('tickets.store'), [
+            'title'       => 'Login page broken',
+            'description' => 'Users cannot log into the platform.',
+            'priority'    => 'normal',
+        ]);
+
+        $ticket          = Ticket::first();
+        $expectedSlaTime = now()->addDay();
+
+        $this->assertTrue(
+            $ticket->sla_due_at->between(
+                $expectedSlaTime->copy()->subSeconds(5),
+                $expectedSlaTime->copy()->addSeconds(5)
+            ),
+            "Normal priority SLA should be 24 hours."
+        );
+    }
+
+    /**
+     * Test: Low priority ticket has a 72-hour SLA.
+     */
+    public function test_low_priority_ticket_has_72h_sla(): void
+    {
+        $org    = Organization::factory()->create();
+        $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+
+        $this->actingAs($client)->post(route('tickets.store'), [
+            'title'       => 'Update email template',
+            'description' => 'The footer email template needs a refresh.',
+            'priority'    => 'low',
+        ]);
+
+        $ticket          = Ticket::first();
+        $expectedSlaTime = now()->addDays(3);
+
+        $this->assertTrue(
+            $ticket->sla_due_at->between(
+                $expectedSlaTime->copy()->subSeconds(5),
+                $expectedSlaTime->copy()->addSeconds(5)
+            ),
+            "Low priority SLA should be 72 hours."
+        );
+    }
+
+    /**
+     * Test: Agent updating priority recalculates the SLA due date.
+     */
+    public function test_agent_priority_change_recalculates_sla(): void
+    {
+        $org    = Organization::factory()->create();
+        $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+        $agent  = User::factory()->create(['role' => 'agent']);
+
+        // Start with a low priority ticket (72h SLA)
+        $ticket = Ticket::factory()->create([
+            'organization_id'   => $org->id,
+            'created_by_user_id' => $client->id,
+            'priority'          => 'low',
+            'status'            => 'open',
+            'sla_due_at'        => now()->addDays(3),
+        ]);
+
+        // Agent upgrades priority to high
+        $this->actingAs($agent)->patch(route('agent.tickets.update', $ticket->id), [
+            'status'   => 'in_progress',
+            'priority' => 'high',
+        ]);
+
+        $ticket->refresh();
+        $expectedSlaTime = now()->addHours(4);
+
+        $this->assertEquals('high', $ticket->priority);
+        $this->assertTrue(
+            $ticket->sla_due_at->between(
+                $expectedSlaTime->copy()->subSeconds(5),
+                $expectedSlaTime->copy()->addSeconds(5)
+            ),
+            "SLA due date should be reset to 4 hours after priority change to high."
+        );
+    }
+
+    /**
+     * Test: Client cannot access the agent ticket index (403 Forbidden).
+     */
+    public function test_client_cannot_access_agent_dashboard(): void
+    {
+        $org    = Organization::factory()->create();
+        $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+
+        $response = $this->actingAs($client)->get(route('agent.tickets.index'));
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test: Unauthenticated user is redirected to login on protected routes.
+     */
+    public function test_unauthenticated_user_is_redirected_to_login(): void
+    {
+        $response = $this->get(route('tickets.index'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    /**
+     * Test: Agent can see internal notes; client on the same ticket cannot.
+     */
+    public function test_agent_can_see_internal_notes_that_clients_cannot(): void
+    {
+        $org    = Organization::factory()->create();
+        $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+        $agent  = User::factory()->create(['role' => 'agent']);
+
+        $ticket = Ticket::factory()->create([
+            'organization_id'    => $org->id,
+            'created_by_user_id' => $client->id,
+        ]);
+
+        Comment::factory()->create([
+            'ticket_id'   => $ticket->id,
+            'user_id'     => $agent->id,
+            'body'        => 'SECRET: customer is known to escalate — be careful.',
+            'is_internal' => true,
+        ]);
+
+        // Client sees zero comments
+        $clientResponse = $this->actingAs($client)->get(route('tickets.show', $ticket->id));
+        $clientResponse->assertStatus(200);
+        $clientResponse->assertInertia(fn (Assert $page) => $page->has('comments', 0));
+
+        // Agent sees one comment (the internal note)
+        $agentResponse = $this->actingAs($agent)->get(route('agent.tickets.show', $ticket->id));
+        $agentResponse->assertStatus(200);
+        $agentResponse->assertInertia(fn (Assert $page) => $page->has('comments', 1));
     }
 }

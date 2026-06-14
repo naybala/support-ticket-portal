@@ -4,7 +4,8 @@ import { Head, Link } from '@inertiajs/vue3';
 import { useTickets } from './useTickets.js';
 
 const props = defineProps({
-    tickets: Array,
+    // tickets is a Laravel paginator object: { data: [...], current_page, last_page, links, ... }
+    tickets: Object,
 });
 
 const {
@@ -120,7 +121,7 @@ const {
                 <!-- Tickets List Card -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200/80">
                     <div class="p-6">
-                        <div v-if="tickets.length === 0" class="text-center py-16">
+                        <div v-if="tickets.data.length === 0" class="text-center py-16">
                             <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>
@@ -142,7 +143,7 @@ const {
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     <tr 
-                                        v-for="ticket in tickets" 
+                                        v-for="ticket in tickets.data" 
                                         :key="ticket.id" 
                                         class="hover:bg-slate-50/75 transition-colors duration-150"
                                     >
@@ -197,6 +198,29 @@ const {
                             </table>
                         </div>
                     </div>
+                </div>
+
+                <!-- Pagination Links -->
+                <div v-if="tickets.last_page > 1" class="flex items-center justify-center gap-1 pt-2">
+                    <template v-for="link in tickets.links" :key="link.label">
+                        <Link
+                            v-if="link.url"
+                            :href="link.url"
+                            :class="[
+                                'px-3 py-1.5 rounded-lg text-sm border transition-colors duration-150',
+                                link.active
+                                    ? 'bg-indigo-600 text-white border-indigo-600 font-semibold'
+                                    : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                            ]"
+                            preserve-scroll
+                            v-html="link.label"
+                        />
+                        <span
+                            v-else
+                            class="px-3 py-1.5 rounded-lg text-sm border bg-white text-slate-300 border-slate-200 cursor-not-allowed"
+                            v-html="link.label"
+                        />
+                    </template>
                 </div>
             </div>
         </div>

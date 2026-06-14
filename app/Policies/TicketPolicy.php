@@ -8,6 +8,14 @@ use App\Models\User;
 class TicketPolicy
 {
     /**
+     * Determine whether an agent can list all tickets.
+     */
+    public function viewAny(User $user): bool 
+    {
+        return $user->role === 'agent';
+    }
+
+    /**
      * Determine whether the user can view the ticket.
      */
     public function view(User $user, Ticket $ticket): bool
