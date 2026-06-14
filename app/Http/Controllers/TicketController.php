@@ -26,7 +26,7 @@ class TicketController extends Controller
     /**
      * Display a listing of the client's tickets.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (auth()->user()->role === 'agent') {
             return redirect()->route('agent.tickets.index');
@@ -34,11 +34,18 @@ class TicketController extends Controller
 
         $tickets = Ticket::where('organization_id', auth()->user()->organization_id)
             ->with(['creator', 'assignedAgent'])
+            ->when($request->status, fn($q, $s) => $q->where('status', $s))
+            ->when($request->search, fn($q, $s) => $q->where(fn($sub) =>
+                $sub->where('title', 'like', "%{$s}%")
+                    ->orWhere('description', 'like', "%{$s}%")
+            ))
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('Tickets/Index', [
-            'tickets' => $tickets
+            'tickets' => $tickets,
+            'filters' => $request->only(['status', 'search']),
         ]);
     }
 

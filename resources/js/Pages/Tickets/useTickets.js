@@ -1,7 +1,7 @@
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, reactive } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
 
-export function useTickets() {
+export function useTickets(initialFilters = {}) {
     const showCreateForm = ref(false);
 
     const form = useForm({
@@ -9,6 +9,24 @@ export function useTickets() {
         description: '',
         priority: 'normal',
     });
+
+    const filters = reactive({
+        status: initialFilters.status ?? '',
+        search: initialFilters.search ?? '',
+    });
+
+    const applyFilters = () => {
+        router.get(route('tickets.index'), filters, {
+            preserveState: true,
+            replace: true,
+        });
+    };
+
+    const clearFilters = () => {
+        filters.status = '';
+        filters.search = '';
+        router.get(route('tickets.index'), {}, { replace: true });
+    };
 
     const submit = () => {
         form.post(route('tickets.store'), {
@@ -76,6 +94,9 @@ export function useTickets() {
     return {
         showCreateForm,
         form,
+        filters,
+        applyFilters,
+        clearFilters,
         submit,
         getPriorityClass,
         getStatusClass,

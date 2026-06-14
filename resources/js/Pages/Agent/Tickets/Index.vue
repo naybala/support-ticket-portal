@@ -18,6 +18,7 @@ const {
     priorityFilter,
     organizationIdFilter,
     searchQuery,
+    applyFilters,
     resetFilters,
     getPriorityClass,
     getStatusClass,
@@ -48,128 +49,121 @@ const {
         </template>
 
         <div class="py-12 bg-slate-50 min-h-screen">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="mx-auto sm:px-6 lg:px-8 space-y-6">
                 <!-- Filters panel -->
                 <div
                     class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5"
                 >
-                    <div
-                        class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4"
-                    >
+                    <form @submit.prevent="applyFilters">
                         <div
-                            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full"
+                            class="flex flex-col lg:flex-row justify-between items-end gap-4"
                         >
-                            <!-- Search -->
-                            <div class="flex flex-col">
-                                <label
-                                    for="search-filter"
-                                    class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                                    >Search</label
-                                >
-                                <input
-                                    id="search-filter"
-                                    type="text"
-                                    v-model="searchQuery"
-                                    placeholder="Search title/desc..."
-                                    class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
-                                />
-                            </div>
-
-                            <!-- Status -->
-                            <div class="flex flex-col">
-                                <label
-                                    for="status-filter"
-                                    class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                                    >Status</label
-                                >
-                                <select
-                                    id="status-filter"
-                                    v-model="statusFilter"
-                                    class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="open">Open</option>
-                                    <option value="in_progress">
-                                        In Progress
-                                    </option>
-                                    <option value="resolved">Resolved</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                            </div>
-
-                            <!-- Priority -->
-                            <div class="flex flex-col">
-                                <label
-                                    for="priority-filter"
-                                    class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                                    >Priority</label
-                                >
-                                <select
-                                    id="priority-filter"
-                                    v-model="priorityFilter"
-                                    class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
-                                >
-                                    <option value="">All Priorities</option>
-                                    <option value="low">Low</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High</option>
-                                </select>
-                            </div>
-
-                            <!-- Organization -->
-                            <div class="flex flex-col">
-                                <label
-                                    for="org-filter"
-                                    class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                                    >Organization</label
-                                >
-                                <select
-                                    id="org-filter"
-                                    v-model="organizationIdFilter"
-                                    class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
-                                >
-                                    <option value="">All Organizations</option>
-                                    <option
-                                        v-for="org in organizations"
-                                        :key="org.id"
-                                        :value="org.id"
-                                    >
-                                        {{ org.name }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div
-                            v-if="
-                                statusFilter ||
-                                priorityFilter ||
-                                organizationIdFilter ||
-                                searchQuery
-                            "
-                            class="pt-2 lg:pt-0 shrink-0"
-                        >
-                            <button
-                                @click="resetFilters"
-                                class="text-sm font-semibold text-indigo-600 hover:text-indigo-900 flex items-center gap-1 transition-all h-10 align-middle"
+                            <div
+                                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                <!-- Search -->
+                                <div class="flex flex-col">
+                                    <label
+                                        for="search-filter"
+                                        class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                        >Search</label
+                                    >
+                                    <input
+                                        id="search-filter"
+                                        type="text"
+                                        v-model="searchQuery"
+                                        placeholder="Search title/desc..."
+                                        class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
                                     />
-                                </svg>
-                                Clear filters
-                            </button>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="flex flex-col">
+                                    <label
+                                        for="status-filter"
+                                        class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                        >Status</label
+                                    >
+                                    <select
+                                        id="status-filter"
+                                        v-model="statusFilter"
+                                        class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        <option value="open">Open</option>
+                                        <option value="in_progress">
+                                            In Progress
+                                        </option>
+                                        <option value="resolved">
+                                            Resolved
+                                        </option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+
+                                <!-- Priority -->
+                                <div class="flex flex-col">
+                                    <label
+                                        for="priority-filter"
+                                        class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                        >Priority</label
+                                    >
+                                    <select
+                                        id="priority-filter"
+                                        v-model="priorityFilter"
+                                        class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
+                                    >
+                                        <option value="">All Priorities</option>
+                                        <option value="low">Low</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+
+                                <!-- Organization -->
+                                <div class="flex flex-col">
+                                    <label
+                                        for="org-filter"
+                                        class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                        >Organization</label
+                                    >
+                                    <select
+                                        id="org-filter"
+                                        v-model="organizationIdFilter"
+                                        class="rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 bg-white"
+                                    >
+                                        <option value="">
+                                            All Organizations
+                                        </option>
+                                        <option
+                                            v-for="org in organizations"
+                                            :key="org.id"
+                                            :value="org.id"
+                                        >
+                                            {{ org.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex gap-2 shrink-0">
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150"
+                                >
+                                    Apply
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="resetFilters"
+                                    class="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150"
+                                >
+                                    Clear
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Tickets List Card -->

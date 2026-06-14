@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 export function useAgentTickets(props) {
@@ -19,19 +19,12 @@ export function useAgentTickets(props) {
         });
     };
 
-    watch([statusFilter, priorityFilter, organizationIdFilter], () => {
-        applyFilters();
-    });
-
-    watch(searchQuery, () => {
-        applyFilters();
-    });
-
     const resetFilters = () => {
         statusFilter.value = '';
         priorityFilter.value = '';
         organizationIdFilter.value = '';
         searchQuery.value = '';
+        router.get(route('agent.tickets.index'), {}, { replace: true });
     };
 
     const getPriorityClass = (priority) => {
@@ -93,6 +86,7 @@ export function useAgentTickets(props) {
         priorityFilter,
         organizationIdFilter,
         searchQuery,
+        applyFilters,
         resetFilters,
         getPriorityClass,
         getStatusClass,
