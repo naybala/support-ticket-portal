@@ -73,7 +73,7 @@ class TicketController extends Controller
         $comments = $ticket->comments()
             ->where('is_internal', false)
             ->with('user')
-            ->latest()
+            ->orderBy('id', 'asc')
             ->get();
 
         return Inertia::render('Tickets/Show', [
@@ -140,7 +140,7 @@ class TicketController extends Controller
         // Agents see all comments including internal notes.
         $comments = $ticket->comments()
             ->with('user')
-            ->latest()
+            ->orderBy('id', 'asc')
             ->get();
 
         $agents = User::where('role', 'agent')->get();
