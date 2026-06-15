@@ -1,6 +1,6 @@
 # Support Ticket Portal
 
-A practical, secure, and maintainable Support Ticket Portal built with **Laravel 12**, **Inertia.js**, and **Vue 3**.
+A practical, secure, and maintainable Support Ticket Portal built with **Laravel 13**, **Inertia.js**, and **Vue 3**.
 
 This project provides a robust support ticket system with distinct views for **Clients** and **Support Agents**. Clients can create and track tickets for their organization, while Support Agents can manage, update, assign tickets, and communicate using public comments or private internal notes.
 
