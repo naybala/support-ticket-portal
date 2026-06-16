@@ -251,6 +251,11 @@ const {
                                             Assigned Agent
                                         </th>
                                         <th
+                                            class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                        >
+                                            Created By
+                                        </th>
+                                        <th
                                             class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider rounded-r-lg"
                                         >
                                             Created At
@@ -360,6 +365,26 @@ const {
                                                         ? ticket.assigned_agent
                                                               .name
                                                         : "Unassigned"
+                                                }}</span>
+                                            </div>
+                                        </td>
+                                        <td
+                                            class="px-6 py-5 whitespace-nowrap text-sm text-slate-600"
+                                        >
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 uppercase"
+                                                >
+                                                    {{
+                                                        ticket.creator
+                                                            ? ticket.creator.name.charAt(0)
+                                                            : "?"
+                                                    }}
+                                                </span>
+                                                <span>{{
+                                                    ticket.creator
+                                                        ? ticket.creator.name
+                                                        : "Unknown"
                                                 }}</span>
                                             </div>
                                         </td>
