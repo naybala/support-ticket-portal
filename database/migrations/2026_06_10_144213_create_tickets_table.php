@@ -33,7 +33,7 @@ return new class extends Migration
                 'high'
             ]);
 
-            $table->timestamp('sla_due_at');
+            $table->timestamp('sla_due_at')->nullable();
 
             $table->timestamps();
         });
