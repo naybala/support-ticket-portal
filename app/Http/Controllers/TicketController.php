@@ -59,9 +59,9 @@ class TicketController extends Controller
             'created_by_user_id' => auth()->id(),
             'title'             => $request->title,
             'description'       => $request->description,
-            'priority'          => $request->priority,
+            'priority'          => 'normal',
             'status'            => 'open',
-            'sla_due_at'        => $this->slaService->calculate($request->priority),
+            'sla_due_at'        => $this->slaService->calculate('normal'),
         ]);
 
         return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully.');

@@ -7,7 +7,6 @@ export function useTickets(initialFilters = {}) {
     const form = useForm({
         title: '',
         description: '',
-        priority: 'normal',
     });
 
     const filters = reactive({

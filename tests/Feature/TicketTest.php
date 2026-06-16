@@ -97,7 +97,8 @@ class TicketTest extends TestCase
     }
 
     /**
-     * Test: High priority ticket creation yields a 4-hour SLA due date.
+     * Test: New client tickets always default to 'normal' priority with a 24h SLA.
+     * (Clients no longer choose priority — agents triage after creation.)
      */
     public function test_high_priority_creates_4h_sla(): void
     {
@@ -108,30 +109,29 @@ class TicketTest extends TestCase
             'organization_id' => $org->id,
         ]);
 
-        // Act as client and submit a high priority ticket
+        // Act as client — priority is NOT submitted; controller defaults to 'normal'
         $response = $this->actingAs($client)->post(route('tickets.store'), [
             'title' => 'Urgent Server Crash',
             'description' => 'Our main production DB is failing requests.',
-            'priority' => 'high',
         ]);
 
         // Should redirect to the show page of the new ticket
         $response->assertRedirect();
 
-        // Check that the ticket was created in DB with 4-hour SLA
+        // Ticket is always created with 'normal' priority (agents triage later)
         $ticket = Ticket::first();
         $this->assertNotNull($ticket);
-        $this->assertEquals('high', $ticket->priority);
+        $this->assertEquals('normal', $ticket->priority);
         $this->assertEquals('open', $ticket->status);
 
-        // SLA due time should be approximately now + 4 hours (within 5 seconds tolerance)
-        $expectedSlaTime = now()->addHours(4);
+        // SLA due time should be approximately now + 24h (within 5 seconds tolerance)
+        $expectedSlaTime = now()->addDay();
         $this->assertTrue(
             $ticket->sla_due_at->between(
                 $expectedSlaTime->copy()->subSeconds(5),
                 $expectedSlaTime->copy()->addSeconds(5)
             ),
-            "SLA due date was not set to 4 hours in future. Got: {$ticket->sla_due_at}, expected: {$expectedSlaTime}"
+            "New tickets should default to normal priority (24h SLA). Got: {$ticket->sla_due_at}"
         );
     }
 
@@ -208,17 +208,17 @@ class TicketTest extends TestCase
         );
     }
     /**
-     * Test: Normal priority ticket has a 24-hour SLA.
+     * Test: All client-submitted tickets default to normal priority with a 24-hour SLA.
      */
     public function test_normal_priority_ticket_has_24h_sla(): void
     {
         $org    = Organization::factory()->create();
         $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
 
+        // No priority submitted — controller always sets 'normal'
         $this->actingAs($client)->post(route('tickets.store'), [
             'title'       => 'Login page broken',
             'description' => 'Users cannot log into the platform.',
-            'priority'    => 'normal',
         ]);
 
         $ticket          = Ticket::first();
@@ -229,27 +229,37 @@ class TicketTest extends TestCase
                 $expectedSlaTime->copy()->subSeconds(5),
                 $expectedSlaTime->copy()->addSeconds(5)
             ),
-            "Normal priority SLA should be 24 hours."
+            "Default priority SLA should be 24 hours."
         );
     }
 
     /**
-     * Test: Low priority ticket has a 72-hour SLA.
+     * Test: Agent downgrading priority to 'low' recalculates SLA to 72 hours.
      */
     public function test_low_priority_ticket_has_72h_sla(): void
     {
         $org    = Organization::factory()->create();
         $client = User::factory()->create(['role' => 'client', 'organization_id' => $org->id]);
+        $agent  = User::factory()->create(['role' => 'agent']);
 
-        $this->actingAs($client)->post(route('tickets.store'), [
-            'title'       => 'Update email template',
-            'description' => 'The footer email template needs a refresh.',
-            'priority'    => 'low',
+        // Create ticket via factory (defaults to normal)
+        $ticket = Ticket::factory()->create([
+            'organization_id'    => $org->id,
+            'created_by_user_id' => $client->id,
+            'priority'           => 'normal',
+            'status'             => 'open',
+            'sla_due_at'         => now()->addDay(),
         ]);
 
-        $ticket          = Ticket::first();
+        // Agent downgrades to low priority
+        $this->actingAs($agent)->patch(route('agent.tickets.update', $ticket->id), [
+            'priority' => 'low',
+        ]);
+
+        $ticket->refresh();
         $expectedSlaTime = now()->addDays(3);
 
+        $this->assertEquals('low', $ticket->priority);
         $this->assertTrue(
             $ticket->sla_due_at->between(
                 $expectedSlaTime->copy()->subSeconds(5),

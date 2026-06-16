@@ -103,44 +103,7 @@ const {
                                 </div>
                             </div>
 
-                            <div class="w-full sm:w-1/3">
-                                <label
-                                    for="priority"
-                                    class="block text-sm text-slate-700 font-semibold mb-2"
-                                    >Priority Level</label
-                                >
-                                <div class="grid grid-cols-3 gap-2">
-                                    <label
-                                        v-for="prio in [
-                                            'low',
-                                            'normal',
-                                            'high',
-                                        ]"
-                                        :key="prio"
-                                        class="cursor-pointer border rounded-lg p-3 text-center transition-all duration-150 capitalize flex flex-col justify-center items-center text-sm font-medium"
-                                        :class="
-                                            form.priority === prio
-                                                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-500/20'
-                                                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
-                                        "
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="priority"
-                                            :value="prio"
-                                            v-model="form.priority"
-                                            class="sr-only"
-                                        />
-                                        <span>{{ prio }}</span>
-                                    </label>
-                                </div>
-                                <div
-                                    v-if="form.errors.priority"
-                                    class="text-rose-600 text-xs mt-1"
-                                >
-                                    {{ form.errors.priority }}
-                                </div>
-                            </div>
+
 
                             <div
                                 class="flex justify-end gap-3 pt-4 border-t border-slate-100"
