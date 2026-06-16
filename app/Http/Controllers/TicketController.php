@@ -28,9 +28,7 @@ class TicketController extends Controller
      */
     public function index(Request $request)
     {
-        if (auth()->user()->role === 'agent') {
-            return redirect()->route('agent.tickets.index');
-        }
+        Gate::authorize('viewClientIndex', Ticket::class);
 
         $tickets = Ticket::where('organization_id', auth()->user()->organization_id)
             ->with(['creator', 'assignedAgent'])
@@ -54,6 +52,8 @@ class TicketController extends Controller
      */
     public function store(StoreTicketRequest $request)
     {
+        Gate::authorize('create', Ticket::class);
+
         $ticket = Ticket::create([
             'organization_id'   => auth()->user()->organization_id,
             'created_by_user_id' => auth()->id(),

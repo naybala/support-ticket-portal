@@ -8,11 +8,29 @@ use App\Models\User;
 class TicketPolicy
 {
     /**
-     * Determine whether an agent can list all tickets.
+     * Determine whether an agent can list all tickets (agent dashboard).
      */
-    public function viewAny(User $user): bool 
+    public function viewAny(User $user): bool
     {
         return $user->role === 'agent';
+    }
+
+    /**
+     * Determine whether a client can view their own ticket index.
+     * Agents are redirected to their own dashboard and must not access this route.
+     */
+    public function viewClientIndex(User $user): bool
+    {
+        return $user->role === 'client';
+    }
+
+    /**
+     * Determine whether a client can open a new ticket.
+     * Agents use a separate internal workflow and must not create tickets this way.
+     */
+    public function create(User $user): bool
+    {
+        return $user->role === 'client';
     }
 
     /**

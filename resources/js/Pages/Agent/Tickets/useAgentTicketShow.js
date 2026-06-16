@@ -1,6 +1,17 @@
 import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 export function useAgentTicketShow(props) {
+    // ── Toast notification ────────────────────────────────────────────────────
+    const toast = ref(null); // { message, type: 'success' | 'error' }
+    let toastTimer = null;
+
+    const showToast = (message, type = 'success') => {
+        clearTimeout(toastTimer);
+        toast.value = { message, type };
+        toastTimer = setTimeout(() => { toast.value = null; }, 3500);
+    };
+
     // Form for support actions (status, priority, assignee)
     const actionForm = useForm({
         status: props.ticket.status,
@@ -17,15 +28,20 @@ export function useAgentTicketShow(props) {
     const submitAction = () => {
         actionForm.patch(route('agent.tickets.update', props.ticket.id), {
             preserveScroll: true,
+            onSuccess: () => showToast('Changes applied successfully.'),
+            onError:   () => showToast('Failed to apply changes. Please check the form.', 'error'),
         });
     };
 
     const submitComment = () => {
         commentForm.post(route('agent.tickets.comments.store', props.ticket.id), {
+            preserveScroll: true,
             onSuccess: () => {
                 commentForm.reset('body');
+                const label = commentForm.is_internal ? 'Internal note saved.' : 'Reply sent successfully.';
+                showToast(label);
             },
-            preserveScroll: true,
+            onError: () => showToast('Failed to post comment.', 'error'),
         });
     };
 
@@ -84,6 +100,7 @@ export function useAgentTicketShow(props) {
     };
 
     return {
+        toast,
         actionForm,
         commentForm,
         submitAction,

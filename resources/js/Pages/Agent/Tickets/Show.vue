@@ -10,6 +10,7 @@ const props = defineProps({
 });
 
 const {
+    toast,
     actionForm,
     commentForm,
     submitAction,
@@ -52,6 +53,33 @@ const {
                 </div>
             </div>
         </template>
+
+        <!-- ── Toast Notification ─────────────────────────────────────── -->
+        <Transition
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="opacity-0 translate-y-4"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-4"
+        >
+            <div
+                v-if="toast"
+                class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold max-w-sm"
+                :class="toast.type === 'success'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-rose-600 border-rose-500 text-white'"
+            >
+                <!-- Icon -->
+                <svg v-if="toast.type === 'success'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {{ toast.message }}
+            </div>
+        </Transition>
 
         <div class="py-12 bg-slate-50 min-h-screen">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
