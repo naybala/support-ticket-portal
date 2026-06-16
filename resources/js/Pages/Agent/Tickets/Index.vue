@@ -374,7 +374,7 @@ const {
                         </div>
                     </div>
                 </div>
-
+                <br />
                 <!-- Pagination Links -->
                 <div
                     v-if="tickets.last_page > 1"

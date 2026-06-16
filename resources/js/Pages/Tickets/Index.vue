@@ -103,8 +103,6 @@ const {
                                 </div>
                             </div>
 
-
-
                             <div
                                 class="flex justify-end gap-3 pt-4 border-t border-slate-100"
                             >
@@ -371,13 +369,17 @@ const {
                                         <td
                                             class="px-6 py-5 whitespace-nowrap text-sm text-slate-600"
                                         >
-                                            <div class="flex items-center gap-2">
+                                            <div
+                                                class="flex items-center gap-2"
+                                            >
                                                 <span
                                                     class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 uppercase"
                                                 >
                                                     {{
                                                         ticket.creator
-                                                            ? ticket.creator.name.charAt(0)
+                                                            ? ticket.creator.name.charAt(
+                                                                  0,
+                                                              )
                                                             : "?"
                                                     }}
                                                 </span>
@@ -399,7 +401,7 @@ const {
                         </div>
                     </div>
                 </div>
-
+                <br />
                 <!-- Pagination Links -->
                 <div
                     v-if="tickets.last_page > 1"
