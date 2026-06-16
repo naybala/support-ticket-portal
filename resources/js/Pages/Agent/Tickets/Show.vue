@@ -1,7 +1,8 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { useAgentTicketShow } from './useAgentTicketShow.js';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head, Link } from "@inertiajs/vue3";
+import { useAgentTicketShow } from "./useAgentTicketShow.js";
+import { Transition } from "vue";
 
 const props = defineProps({
     ticket: Object,
@@ -15,7 +16,6 @@ const {
     commentForm,
     submitAction,
     submitComment,
-    getPriorityClass,
     getStatusClass,
     getSlaStateClass,
     formatSlaState,
@@ -33,21 +33,35 @@ const {
                     :href="route('agent.tickets.index')"
                     class="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 transition shadow-sm"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                        />
                     </svg>
                 </Link>
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-slate-400">Agent Control / Ticket #{{ ticket.id }}</span>
-                        <span 
+                        <span class="text-sm font-semibold text-slate-400"
+                            >Agent Control / Ticket #{{ ticket.id }}</span
+                        >
+                        <span
                             class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border"
                             :class="getStatusClass(ticket.status)"
                         >
-                            {{ ticket.status.replace('_', ' ') }}
+                            {{ ticket.status.replace("_", " ") }}
                         </span>
                     </div>
-                    <h2 class="font-bold text-xl text-slate-800 leading-tight mt-1">
+                    <h2
+                        class="font-bold text-xl text-slate-800 leading-tight mt-1"
+                    >
                         {{ ticket.title }}
                     </h2>
                 </div>
@@ -66,16 +80,40 @@ const {
             <div
                 v-if="toast"
                 class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold max-w-sm"
-                :class="toast.type === 'success'
-                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                    : 'bg-rose-600 border-rose-500 text-white'"
+                :class="
+                    toast.type === 'success'
+                        ? 'bg-emerald-600 border-emerald-500 text-white'
+                        : 'bg-rose-600 border-rose-500 text-white'
+                "
             >
                 <!-- Icon -->
-                <svg v-if="toast.type === 'success'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                <svg
+                    v-if="toast.type === 'success'"
+                    class="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M5 13l4 4L19 7"
+                    />
                 </svg>
-                <svg v-else class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                    v-else
+                    class="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
                 </svg>
                 {{ toast.message }}
             </div>
@@ -87,23 +125,49 @@ const {
                     <!-- Ticket Main Content (Description and Conversation) -->
                     <div class="lg:col-span-2 space-y-8">
                         <!-- Ticket Description -->
-                        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div
+                            class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden"
+                        >
                             <div class="p-6 sm:p-8">
-                                <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+                                <div
+                                    class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6"
+                                >
                                     <div class="flex items-center gap-3">
-                                        <div class="h-10 w-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm uppercase">
+                                        <div
+                                            class="h-10 w-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm uppercase"
+                                        >
                                             {{ ticket.creator.name.charAt(0) }}
                                         </div>
                                         <div>
-                                            <div class="text-sm font-bold text-slate-800">
+                                            <div
+                                                class="text-sm font-bold text-slate-800"
+                                            >
                                                 {{ ticket.creator.name }}
-                                                <span class="text-xs text-slate-400 font-normal ml-2">({{ ticket.organization ? ticket.organization.name : 'No Org' }})</span>
+                                                <span
+                                                    class="text-xs text-slate-400 font-normal ml-2"
+                                                    >({{
+                                                        ticket.organization
+                                                            ? ticket
+                                                                  .organization
+                                                                  .name
+                                                            : "No Org"
+                                                    }})</span
+                                                >
                                             </div>
-                                            <div class="text-xs text-slate-400">Submitted on {{ formatDate(ticket.created_at) }}</div>
+                                            <div class="text-xs text-slate-400">
+                                                Submitted on
+                                                {{
+                                                    formatDate(
+                                                        ticket.created_at,
+                                                    )
+                                                }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-slate-700 whitespace-pre-wrap leading-relaxed text-sm">
+                                <div
+                                    class="text-slate-700 whitespace-pre-wrap leading-relaxed text-sm"
+                                >
                                     {{ ticket.description }}
                                 </div>
                             </div>
@@ -111,72 +175,115 @@ const {
 
                         <!-- Conversation Section -->
                         <div class="space-y-6">
-                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <h3
+                                class="text-base font-bold text-slate-800 flex items-center gap-2"
+                            >
                                 <span>Conversation Timeline</span>
-                                <span class="bg-slate-200 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-semibold">{{ comments.length }}</span>
+                                <span
+                                    class="bg-slate-200 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-semibold"
+                                    >{{ comments.length }}</span
+                                >
                             </h3>
 
-                            <div v-if="comments.length === 0" class="bg-white rounded-xl border border-slate-200/80 p-8 text-center text-slate-400 text-sm">
-                                No comments exist yet. Use the area below to send a message or record internal notes.
+                            <div
+                                v-if="comments.length === 0"
+                                class="bg-white rounded-xl border border-slate-200/80 p-8 text-center text-slate-400 text-sm"
+                            >
+                                No comments exist yet. Use the area below to
+                                send a message or record internal notes.
                             </div>
 
                             <div v-else class="space-y-4">
-                                <div 
-                                    v-for="comment in comments" 
+                                <div
+                                    v-for="comment in comments"
                                     :key="comment.id"
                                     class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 transition duration-150"
                                     :class="[
-                                        comment.is_internal 
-                                            ? 'bg-amber-50/50 border-l-4 border-l-amber-500 border-amber-200' 
-                                            : comment.user.role === 'agent' 
-                                                ? 'border-l-4 border-l-indigo-500' 
-                                                : ''
+                                        comment.is_internal
+                                            ? 'bg-amber-50/50 border-l-4 border-l-amber-500 border-amber-200'
+                                            : comment.user.role === 'agent'
+                                              ? 'border-l-4 border-l-indigo-500'
+                                              : '',
                                     ]"
                                 >
-                                    <div class="flex justify-between items-start mb-3">
+                                    <div
+                                        class="flex justify-between items-start mb-3"
+                                    >
                                         <div class="flex items-center gap-3">
-                                            <div 
+                                            <div
                                                 class="h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border"
                                                 :class="[
-                                                    comment.is_internal 
-                                                        ? 'bg-amber-100 text-amber-800 border-amber-200' 
-                                                        : comment.user.role === 'agent' 
-                                                            ? 'bg-indigo-100 text-indigo-700 border-indigo-200' 
-                                                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                                                    comment.is_internal
+                                                        ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                                        : comment.user.role ===
+                                                            'agent'
+                                                          ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                                                          : 'bg-slate-100 text-slate-700 border-slate-200',
                                                 ]"
                                             >
-                                                {{ comment.user.name.charAt(0) }}
+                                                {{
+                                                    comment.user.name.charAt(0)
+                                                }}
                                             </div>
                                             <div>
-                                                <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                                                    <span>{{ comment.user.name }}</span>
-                                                    <span 
-                                                        v-if="comment.is_internal"
+                                                <div
+                                                    class="text-sm font-bold text-slate-800 flex items-center gap-1.5"
+                                                >
+                                                    <span>{{
+                                                        comment.user.name
+                                                    }}</span>
+                                                    <span
+                                                        v-if="
+                                                            comment.is_internal
+                                                        "
                                                         class="inline-flex items-center px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold uppercase rounded border border-amber-200"
                                                     >
                                                         INTERNAL NOTE
                                                     </span>
-                                                    <span 
-                                                        v-else-if="comment.user.role === 'agent'"
+                                                    <span
+                                                        v-else-if="
+                                                            comment.user
+                                                                .role ===
+                                                            'agent'
+                                                        "
                                                         class="inline-flex items-center px-1.5 py-0.2 bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase rounded border border-indigo-100"
                                                     >
                                                         Agent
                                                     </span>
                                                 </div>
-                                                <div class="text-xs text-slate-400">{{ formatDate(comment.created_at) }}</div>
+                                                <div
+                                                    class="text-xs text-slate-400"
+                                                >
+                                                    {{
+                                                        formatDate(
+                                                            comment.created_at,
+                                                        )
+                                                    }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <p class="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">
+                                    <p
+                                        class="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed"
+                                    >
                                         {{ comment.body }}
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Comment Input Form (With internal note checkbox) -->
-                            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
-                                <h4 class="text-sm font-bold text-slate-800 mb-4">Post Comment / Internal Note</h4>
-                                <form @submit.prevent="submitComment" class="space-y-4">
+                            <div
+                                class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 sm:p-8"
+                            >
+                                <h4
+                                    class="text-sm font-bold text-slate-800 mb-4"
+                                >
+                                    Post Comment / Internal Note
+                                </h4>
+                                <form
+                                    @submit.prevent="submitComment"
+                                    class="space-y-4"
+                                >
                                     <div>
                                         <textarea
                                             v-model="commentForm.body"
@@ -185,23 +292,48 @@ const {
                                             placeholder="Write your response or internal note here..."
                                             class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition duration-150"
                                         ></textarea>
-                                        <div v-if="commentForm.errors.body" class="text-rose-600 text-xs mt-1">{{ commentForm.errors.body }}</div>
+                                        <div
+                                            v-if="commentForm.errors.body"
+                                            class="text-rose-600 text-xs mt-1"
+                                        >
+                                            {{ commentForm.errors.body }}
+                                        </div>
                                     </div>
 
                                     <!-- Internal note checkbox -->
                                     <div class="flex items-center">
-                                        <label class="flex items-center cursor-pointer select-none">
-                                            <input 
-                                                type="checkbox" 
-                                                v-model="commentForm.is_internal"
+                                        <label
+                                            class="flex items-center cursor-pointer select-none"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                v-model="
+                                                    commentForm.is_internal
+                                                "
                                                 class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 h-4 w-4"
                                             />
-                                            <span class="ml-2 text-sm text-slate-600 font-semibold flex items-center gap-1">
-                                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0-6h.01M12 2a10 10 0 110 20 10 10 0 010-20z" />
+                                            <span
+                                                class="ml-2 text-sm text-slate-600 font-semibold flex items-center gap-1"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4 text-amber-500"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 15v2m0-6h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
+                                                    />
                                                 </svg>
                                                 Post as Internal Note
-                                                <span class="text-xs font-normal text-slate-400">(visible only to agents)</span>
+                                                <span
+                                                    class="text-xs font-normal text-slate-400"
+                                                    >(visible only to
+                                                    agents)</span
+                                                >
                                             </span>
                                         </label>
                                     </div>
@@ -212,12 +344,16 @@ const {
                                             :disabled="commentForm.processing"
                                             class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150 shadow-sm"
                                             :class="[
-                                                commentForm.is_internal 
-                                                    ? 'bg-amber-600 hover:bg-amber-700 active:bg-amber-900 focus:ring-amber-500' 
-                                                    : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-900 focus:ring-indigo-500'
+                                                commentForm.is_internal
+                                                    ? 'bg-amber-600 hover:bg-amber-700 active:bg-amber-900 focus:ring-amber-500'
+                                                    : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-900 focus:ring-indigo-500',
                                             ]"
                                         >
-                                            {{ commentForm.is_internal ? 'Save Internal Note' : 'Send Public Reply' }}
+                                            {{
+                                                commentForm.is_internal
+                                                    ? "Save Internal Note"
+                                                    : "Send Public Reply"
+                                            }}
                                         </button>
                                     </div>
                                 </form>
@@ -227,59 +363,111 @@ const {
 
                     <!-- Actions Sidebar (Support Actions Controls) -->
                     <div class="space-y-6">
-                        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-6">
-                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider pb-3 border-b border-slate-100">Support Controls</h3>
-                            
-                            <form @submit.prevent="submitAction" class="space-y-6">
+                        <div
+                            class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-6"
+                        >
+                            <h3
+                                class="text-sm font-bold text-slate-800 uppercase tracking-wider pb-3 border-b border-slate-100"
+                            >
+                                Support Controls
+                            </h3>
+
+                            <form
+                                @submit.prevent="submitAction"
+                                class="space-y-6"
+                            >
                                 <!-- Status Field -->
                                 <div>
-                                    <label for="status" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ticket Status</label>
+                                    <label
+                                        for="status"
+                                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                                        >Ticket Status</label
+                                    >
                                     <select
                                         id="status"
                                         v-model="actionForm.status"
                                         class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     >
                                         <option value="open">Open</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="resolved">Resolved</option>
+                                        <option value="in_progress">
+                                            In Progress
+                                        </option>
+                                        <option value="resolved">
+                                            Resolved
+                                        </option>
                                         <option value="closed">Closed</option>
                                     </select>
-                                    <div v-if="actionForm.errors.status" class="text-rose-600 text-xs mt-1">{{ actionForm.errors.status }}</div>
+                                    <div
+                                        v-if="actionForm.errors.status"
+                                        class="text-rose-600 text-xs mt-1"
+                                    >
+                                        {{ actionForm.errors.status }}
+                                    </div>
                                 </div>
 
                                 <!-- Priority Field -->
                                 <div>
-                                    <label for="priority" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Priority Level</label>
+                                    <label
+                                        for="priority"
+                                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                                        >Priority Level</label
+                                    >
                                     <select
                                         id="priority"
                                         v-model="actionForm.priority"
                                         class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     >
-                                        <option value="low">Low (72h SLA)</option>
-                                        <option value="normal">Normal (24h SLA)</option>
-                                        <option value="high">High (4h SLA)</option>
+                                        <option value="low">
+                                            Low (72h SLA)
+                                        </option>
+                                        <option value="normal">
+                                            Normal (24h SLA)
+                                        </option>
+                                        <option value="high">
+                                            High (4h SLA)
+                                        </option>
                                     </select>
-                                    <div v-if="actionForm.errors.priority" class="text-rose-600 text-xs mt-1">{{ actionForm.errors.priority }}</div>
+                                    <div
+                                        v-if="actionForm.errors.priority"
+                                        class="text-rose-600 text-xs mt-1"
+                                    >
+                                        {{ actionForm.errors.priority }}
+                                    </div>
                                 </div>
 
                                 <!-- Assign Agent Field -->
                                 <div>
-                                    <label for="assigned_to_user_id" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Assigned Agent</label>
+                                    <label
+                                        for="assigned_to_user_id"
+                                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                                        >Assigned Agent</label
+                                    >
                                     <select
                                         id="assigned_to_user_id"
                                         v-model="actionForm.assigned_to_user_id"
                                         class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     >
                                         <option value="">Unassigned</option>
-                                        <option 
-                                            v-for="agent in agents" 
-                                            :key="agent.id" 
+                                        <option
+                                            v-for="agent in agents"
+                                            :key="agent.id"
                                             :value="agent.id"
                                         >
                                             {{ agent.name }}
                                         </option>
                                     </select>
-                                    <div v-if="actionForm.errors.assigned_to_user_id" class="text-rose-600 text-xs mt-1">{{ actionForm.errors.assigned_to_user_id }}</div>
+                                    <div
+                                        v-if="
+                                            actionForm.errors
+                                                .assigned_to_user_id
+                                        "
+                                        class="text-rose-600 text-xs mt-1"
+                                    >
+                                        {{
+                                            actionForm.errors
+                                                .assigned_to_user_id
+                                        }}
+                                    </div>
                                 </div>
 
                                 <button
@@ -293,25 +481,45 @@ const {
                         </div>
 
                         <!-- Extra Metadata -->
-                        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-4">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100">SLA Details</h4>
+                        <div
+                            class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-4"
+                        >
+                            <h4
+                                class="text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100"
+                            >
+                                SLA Details
+                            </h4>
                             <div class="flex flex-col gap-2">
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-500">SLA State:</span>
-                                    <span 
+                                <div
+                                    class="flex justify-between items-center text-sm"
+                                >
+                                    <span class="text-slate-500"
+                                        >SLA State:</span
+                                    >
+                                    <span
                                         class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold border"
-                                        :class="getSlaStateClass(ticket.sla_state)"
+                                        :class="
+                                            getSlaStateClass(ticket.sla_state)
+                                        "
                                     >
                                         {{ formatSlaState(ticket.sla_state) }}
                                     </span>
                                 </div>
-                                <div class="flex justify-between items-center text-sm">
+                                <div
+                                    class="flex justify-between items-center text-sm"
+                                >
                                     <span class="text-slate-500">Due at:</span>
-                                    <span class="font-medium text-slate-700">{{ formatDate(ticket.sla_due_at) }}</span>
+                                    <span class="font-medium text-slate-700">{{
+                                        formatDate(ticket.sla_due_at)
+                                    }}</span>
                                 </div>
-                                <div class="flex justify-between items-center text-sm">
+                                <div
+                                    class="flex justify-between items-center text-sm"
+                                >
                                     <span class="text-slate-500">Created:</span>
-                                    <span class="font-medium text-slate-700">{{ formatDate(ticket.created_at) }}</span>
+                                    <span class="font-medium text-slate-700">{{
+                                        formatDate(ticket.created_at)
+                                    }}</span>
                                 </div>
                             </div>
                         </div>

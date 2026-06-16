@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserType;
+
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -18,7 +18,7 @@ class OrganizationSeeder extends Seeder
         //// First, create a root agent to be the creator of organisations
         $rootAgent = User::factory()->create([
             'name' => 'Root Agent',
-            'type' => UserType::Agent->value,
+            'role' => 'agent',
             'organization_id' => null,
         ]);
 

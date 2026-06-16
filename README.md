@@ -13,7 +13,7 @@ The application uses the **Laravel + Inertia.js (Vue 3) + Tailwind CSS** stack. 
 ### Why This Stack?
 
 - **Laravel + Inertia.js**: No need for a separate API, OAuth tokens, or duplicated validation rules. Controller logic directly dictates what data reaches the Vue component. This is the correct tool for a monolithic team-owned portal.
-- **Vue 3 Composition API**: All page logic is extracted into composables (`useAgentTickets.js`, `useTicketShow.js`, etc.), keeping each `.vue` file focused purely on markup. Logic files are independently reusable and testable.
+- **Vue 3 Composition API**: All page logic is extracted into composables (`useAgentTickets.js`, `useAgentTicketShow.js`, etc.), keeping each `.vue` file focused purely on markup. Logic files are independently reusable and testable. Composables also own UI state like the self-dismissing toast notification system (`toast` ref + `showToast()`).
 - **Service Layer (`SlaService`)**: SLA calculation is decoupled from both controllers and models into a dedicated service. This makes the business rules easy to locate, test, and extend independently.
 
 ### Database Schema
@@ -29,14 +29,26 @@ The application uses the **Laravel + Inertia.js (Vue 3) + Tailwind CSS** stack. 
 
 ## 🔐 Authorization Model
 
-Authorization is governed by Laravel **Policies** (`TicketPolicy`) to prevent unauthorized access and data leakage. All checks use `Gate::authorize()` — no raw `abort(403)` calls scattered through controllers.
+Authorization is governed by Laravel **Policies** (`TicketPolicy`) to prevent unauthorized access and data leakage. All checks use `Gate::authorize()` — no raw `abort(403)` calls or inline role checks scattered through controllers.
+
+### Policy Methods
+
+| Method            | Who passes                       | Used by                                 |
+| ----------------- | -------------------------------- | --------------------------------------- |
+| `viewClientIndex` | `client` only                    | `TicketController::index()`             |
+| `create`          | `client` only                    | `TicketController::store()`             |
+| `viewAny`         | `agent` only                     | `TicketController::agentIndex()`        |
+| `view`            | agent always; client if same org | `show()`, `agentShow()`                 |
+| `update`          | agent always; client if same org | `agentUpdate()`                         |
+| `comment`         | agent always; client if same org | `storeComment()`, `storeAgentComment()` |
 
 ### Role: `client`
 
 - Can only **view, comment on, and create** tickets belonging to their own organization (`organization_id` must match).
 - Cannot see tickets from other organizations — `TicketPolicy::view` enforces this with a hard 403.
 - Cannot see agent **internal notes** — the controller actively filters `where('is_internal', false)` before sending data to the Vue page.
-- Cannot access any `/agent/*` routes — `TicketPolicy::viewAny` returns `false` for clients.
+- Cannot access `/agent/*` routes — `TicketPolicy::viewAny` returns `false` for clients.
+- Cannot reach the client ticket list or ticket creation form — `TicketPolicy::viewClientIndex` and `TicketPolicy::create` both return `false` for agents, ensuring the routing is symmetric in both directions.
 
 ### Role: `agent`
 
@@ -224,8 +236,15 @@ Both the client and agent ticket actions live in one controller, growing it to ~
 **2. SLA state is recomputed on every model serialization.**
 The `getSlaStateAttribute()` accessor runs on every JSON response. For a high-volume system this should be a scheduled background job that writes `sla_state` to the DB and uses a DB index — both for performance and to enable server-side filtering by SLA state.
 
-**3. The agent `agentIndex` redirect in the client `index` method is a code smell.**
-The `if (auth()->user()->role === 'agent') { return redirect()... }` guard inside the client controller action is a side-effect. This should be enforced at the middleware/route level instead, keeping the controller method focused on a single responsibility.
-
-**4. Test database uses SQLite in-memory.**
+**3. Test database uses SQLite in-memory.**
 SQLite doesn't enforce foreign key constraints by default and has subtle SQL dialect differences from MySQL. Ideally the test suite runs against a dedicated MySQL test database to catch real-world constraint and query issues.
+
+---
+
+## ✨ Recent Improvements
+
+**Full `Gate::authorize()` coverage on all controller actions.**
+The `index()` (client ticket list) and `store()` (ticket creation) methods previously lacked policy-backed guards. Both now call `Gate::authorize()` via `TicketPolicy::viewClientIndex` and `TicketPolicy::create` respectively, making the authorization contract complete and symmetric — agents are properly denied client routes just as clients are denied agent routes.
+
+**Toast notification feedback on the agent ticket detail page.**
+After applying changes (status, priority, assignee) or posting a comment/internal note, a self-dismissing toast notification slides up from the bottom-right corner. Success messages are green with a checkmark; error messages are red with an X. The toast auto-clears after 3.5 seconds. The entire state (`toast` ref, `showToast()`) lives inside `useAgentTicketShow.js` — the Vue template stays declarative.
