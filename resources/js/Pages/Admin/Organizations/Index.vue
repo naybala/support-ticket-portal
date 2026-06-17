@@ -1,10 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 defineProps({
     organizations: Object,
 });
+
+const confirmDelete = (id) => {
+    if (confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
+        router.delete(route('admin.organizations.destroy', id));
+    }
+};
 </script>
 
 <template>
@@ -52,7 +58,7 @@ defineProps({
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <Link :href="route('admin.organizations.edit', org.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
-                                            <Link :href="route('admin.organizations.destroy', org.id)" method="delete" as="button" class="text-red-600 hover:text-red-900">Delete</Link>
+                                            <button @click="confirmDelete(org.id)" class="text-red-600 hover:text-red-900">Delete</button>
                                         </td>
                                     </tr>
                                 </tbody>

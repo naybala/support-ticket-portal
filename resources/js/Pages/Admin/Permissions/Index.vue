@@ -1,10 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 defineProps({
     permissions: Object,
 });
+
+const confirmDelete = (id) => {
+    if (confirm('Are you sure you want to delete this permission? This action cannot be undone.')) {
+        router.delete(route('admin.permissions.destroy', id));
+    }
+};
 </script>
 
 <template>
@@ -48,7 +54,7 @@ defineProps({
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <Link :href="route('admin.permissions.edit', permission.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
-                                            <Link :href="route('admin.permissions.destroy', permission.id)" method="delete" as="button" class="text-red-600 hover:text-red-900">Delete</Link>
+                                            <button @click="confirmDelete(permission.id)" class="text-red-600 hover:text-red-900">Delete</button>
                                         </td>
                                     </tr>
                                 </tbody>

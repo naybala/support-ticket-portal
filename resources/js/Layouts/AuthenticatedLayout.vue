@@ -62,7 +62,6 @@ const showingNavigationDropdown = ref(false);
                                                 <DropdownLink :href="route('admin.roles.index')">Roles</DropdownLink>
                                                 <DropdownLink :href="route('admin.permissions.index')">Permissions</DropdownLink>
                                                 <DropdownLink :href="route('admin.organizations.index')">Organizations</DropdownLink>
-                                                <DropdownLink :href="route('admin.agents.index')">Agents</DropdownLink>
                                             </template>
                                         </Dropdown>
                                     </div>

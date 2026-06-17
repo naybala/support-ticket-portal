@@ -45,7 +45,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
         Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
         Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
-        Route::resource('agents', \App\Http\Controllers\Admin\AgentController::class);
     });
 });
 
