@@ -38,6 +38,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/agent/tickets/{ticket}', [TicketController::class, 'agentShow'])->name('agent.tickets.show');
     Route::patch('/agent/tickets/{ticket}', [TicketController::class, 'agentUpdate'])->name('agent.tickets.update');
     Route::post('/agent/tickets/{ticket}/comments', [TicketController::class, 'storeAgentComment'])->name('agent.tickets.comments.store');
+
+    // Admin routes for dynamic RBAC & Entities
+    Route::middleware(['role:super-admin|admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+        Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
+        Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
+        Route::resource('agents', \App\Http\Controllers\Admin\AgentController::class);
+    });
 });
 
 require __DIR__.'/auth.php';
